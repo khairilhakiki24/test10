@@ -1,0 +1,24 @@
+{
+    "name": "HypeCal - Brutal Content Calendar",
+    "short_name": "HypeCal",
+    "description": "Aplikasi manajemen kalender konten sosial media bergaya Neo-Brutalism. Mendukung offline mode, export/import Excel, dan print PDF.",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#f4f4f0",
+    "theme_color": "#FF3366",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "assets/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "assets/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

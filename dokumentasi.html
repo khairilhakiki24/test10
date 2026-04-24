@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dokumentasi HypeCal - PWA Neo-Brutalism</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; max-width: 900px; margin: 0 auto; padding: 20px; background: #fafafa; }
+        h1, h2, h3 { color: #111; border-bottom: 2px solid #111; padding-bottom: 5px; }
+        .box { background: #fff; border: 3px solid #000; box-shadow: 4px 4px 0px 0px #000; padding: 20px; margin-bottom: 20px; border-radius: 4px; }
+        code { background: #eee; padding: 2px 5px; border-radius: 3px; font-family: monospace; font-size: 14px; font-weight: bold; }
+        .highlight { background: #ffe600; padding: 2px; }
+    </style>
+</head>
+<body>
+
+    <div class="box" style="text-align: center; background: #FF3366; color: #fff;">
+        <h1 style="border-bottom: none; margin-bottom: 0;">HYPECAL - DOKUMENTASI LENGKAP</h1>
+        <p style="margin-top: 5px;">Aplikasi Kalender Konten Sosial Media Offline (Neo-Brutalism UI)</p>
+    </div>
+
+    <div class="box">
+        <h2>1. Pengantar & Fitur Utama</h2>
+        <p>HypeCal adalah aplikasi berbasis Web App / Progressive Web App (PWA) 100% Offline yang dirancang khusus untuk Social Media Specialist. Menggunakan teknologi Vanilla JS, TailwindCSS, dan IndexedDB.</p>
+        <ul>
+            <li><strong>Neo-Brutalism Design:</strong> UI berani, garis tebal, hard shadow.</li>
+            <li><strong>100% Offline (IndexedDB):</strong> Data tersimpan di browser user. Tidak butuh server/database MySQL.</li>
+            <li><strong>State Persistence (Anti-Data Loss):</strong> Mengetik judul lalu merefresh web? Data form tidak akan hilang.</li>
+            <li><strong>Export/Import Excel:</strong> Backup data secara manual dengan mudah.</li>
+            <li><strong>Dark Mode & Custom Theme:</strong> Ubah warna sesuka hati via Pengaturan.</li>
+        </ul>
+    </div>
+
+    <div class="box">
+        <h2>2. Panduan Folder CodeCanyon (Pemisahan File)</h2>
+        <p>Aplikasi ini diberikan dalam bentuk <em>Single File HTML</em> (<code>index.html</code>) agar mudah dicoba. Namun, untuk struktur produksi CodeCanyon, Anda harus memecahnya. <strong>Ikuti komentar di dalam file index.html!</strong></p>
+        <ol>
+            <li>Buka <code>index.html</code>. Cari tag <code>&lt;!-- FILE: source/assets/css/style.css START --&gt;</code>.</li>
+            <li>Cut (Potong) semua kode CSS yang ada di dalamnya dan Paste ke dalam file baru bernama <code>style.css</code> (letakkan di folder <code>assets/css/</code>).</li>
+            <li>Cari tag <code>// FILE: source/assets/js/app.js START</code>.</li>
+            <li>Cut semua kode JavaScript di dalamnya dan Paste ke dalam file <code>app.js</code> (letakkan di folder <code>assets/js/</code>).</li>
+            <li>Panggil kembali file-file tersebut di dalam <code>index.html</code> menggunakan tag <code>&lt;link&gt;</code> dan <code>&lt;script src="..."&gt;</code>.</li>
+        </ol>
+    </div>
+
+    <div class="box">
+        <h2>3. Panduan Modifikasi PWA & Icon</h2>
+        <p>Agar aplikasi bisa di-install di HP dengan logo Anda, ikuti langkah ini:</p>
+        <ul>
+            <li>Siapkan logo aplikasi Anda dengan format <strong>.png</strong>. Pastikan backgroundnya solid (tidak transparan) untuk desain Brutalism.</li>
+            <li>Buat dua ukuran pasti: <code>192x192 pixels</code> dan <code>512x512 pixels</code>.</li>
+            <li>Ubah nama file tersebut menjadi <code>icon-192x192.png</code> dan <code>icon-512x512.png</code>.</li>
+            <li>Masukkan kedua file tersebut ke dalam folder <code>assets/</code>.</li>
+            <li>Aplikasi akan otomatis membacanya melalui file <code>manifest.json</code>.</li>
+        </ul>
+    </div>
+
+    <div class="box">
+        <h2>4. Panduan Hosting / Instalasi</h2>
+        <p>Aplikasi ini adalah file statis (HTML/CSS/JS). Cara uploadnya sangat mudah:</p>
+        <ol>
+            <li><strong>Menggunakan cPanel:</strong> Login cPanel > Buka File Manager > Masuk ke folder <code>public_html</code> > Upload seluruh file (index, manifest, sw.js) ke dalamnya.</li>
+            <li><strong>Menggunakan GitHub Pages (Gratis):</strong> Buat repository baru > Upload file-file ini > Buka tab Settings > Pages > Pilih branch "main" > Save. Web Anda langsung online!</li>
+            <li><strong>Penting:</strong> Service Worker (PWA) <em>HANYA</em> berjalan jika domain Anda menggunakan <strong>HTTPS (SSL)</strong>. Pastikan SSL website Anda aktif.</li>
+        </ol>
+    </div>
+
+    <div class="box">
+        <h2>5. Panduan Penggunaan Harian</h2>
+        <ul>
+            <li><strong>Master Kategori:</strong> Buka menu ini pertama kali. Tambahkan kategori platform (misal: TikTok, IG Reels) beserta warna labelnya.</li>
+            <li><strong>Kalender Post:</strong> Klik "Buat Post". Input judul, jadwal, dan kategori. Data yang belum disimpan otomatis menjadi "Draf".</li>
+            <li><strong>Geser Tutup (Mobile):</strong> Saat form muncul di layar HP, sentuh dan tarik garis tebal di bagian atas panel ke arah bawah untuk menutup form dengan cepat.</li>
+            <li><strong>Cetak Laporan:</strong> Di menu Kalender, klik "Cetak PDF". UI Brutalism (warna latar/shadow) akan dihilangkan otomatis agar bersih saat dicetak di kertas HVS.</li>
+        </ul>
+    </div>
+
+    <footer style="text-align: center; margin-top: 30px; font-weight: bold;">
+        <p>© 2026 Bejaja Digital. Hak Cipta Dilindungi.</p>
+    </footer>
+
+</body>
+</html>

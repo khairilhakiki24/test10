@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="id" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#FF3366">
+    <title>HypeCal - The Brutal Content Calendar</title>
+    
+    <!-- ============================================== -->
+    <!-- FILE: source/assets/css/style.css START -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap');
+        
+        :root {
+            /* Default Warna Primary - Neon Pink Brutal */
+            --color-primary: #FF3366; 
+            --color-bg: #f4f4f0; /* Warna krem/putih tulang khas brutalism */
+        }
+
+        /* Custom Scrollbar Brutalist */
+        ::-webkit-scrollbar { width: 8px; height: 8px; border-left: 2px solid #000; }
+        ::-webkit-scrollbar-track { background: var(--color-bg); }
+        ::-webkit-scrollbar-thumb { background: var(--color-primary); border: 2px solid #000; }
+        .dark ::-webkit-scrollbar { border-left: 2px solid #fff; background: #1a1a1a;}
+        .dark ::-webkit-scrollbar-thumb { border: 2px solid #fff; }
+        
+        /* Animasi & Interaksi Neo-Brutalism */
+        .btn-brutal { 
+            transition: all 0.1s ease-in-out;
+            box-shadow: 4px 4px 0px 0px rgba(0,0,0,1);
+            border: 2px solid #000;
+        }
+        .btn-brutal:active { 
+            transform: translate(4px, 4px); 
+            box-shadow: 0px 0px 0px 0px rgba(0,0,0,1); 
+        }
+        .dark .btn-brutal { box-shadow: 4px 4px 0px 0px rgba(255,255,255,1); border: 2px solid #fff; }
+        .dark .btn-brutal:active { box-shadow: 0px 0px 0px 0px rgba(255,255,255,1); }
+        
+        /* Form Inputs */
+        .input-brutal {
+            border: 2px solid #000;
+            background: #fff;
+            color: #000;
+            transition: all 0.2s;
+        }
+        .input-brutal:focus {
+            outline: none;
+            box-shadow: 4px 4px 0px 0px var(--color-primary);
+        }
+        .dark .input-brutal {
+            border: 2px solid #fff;
+            background: #2d2d2d;
+            color: #fff;
+        }
+        .dark .input-brutal:focus {
+            box-shadow: 4px 4px 0px 0px var(--color-primary);
+        }
+
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.9) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+        .animate-pop { animation: popIn 0.2s ease-out forwards; }
+        
+        /* Brutal Nav & Layout */
+        .brutal-nav { background: var(--color-bg); border-top: 4px solid #000; }
+        .dark .brutal-nav { background: #1a1a1a; border-top: 4px solid #fff; }
+        
+        /* Safe Area Padding yang ekstrem */
+        .pb-safe { padding-bottom: calc(140px + env(safe-area-inset-bottom, 20px)) !important; }
+
+        /* Swipeable Modal / Bottom Sheet Transition */
+        #post-modal, #view-post-modal {
+            transition: transform 0.2s ease-out;
+        }
+
+        /* PRINT CSS - Rombak Paksa Aturan Tinta */
+        @media print { 
+            body, html { background: #fff !important; color: #000 !important; }
+            body * { visibility: hidden; } 
+            #print-area, #print-area * { visibility: visible; color: #000 !important; } 
+            #print-area { 
+                position: absolute !important; 
+                left: 0 !important; 
+                top: 0 !important; 
+                width: 100% !important; 
+                box-shadow: none !important;
+                border: none !important;
+                background: #fff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            } 
+            .no-print { display: none !important; }
+            th, td { border: 2px solid #000 !important; padding: 10px !important; }
+            .btn-brutal { box-shadow: none !important; border: 1px solid #000 !important; }
+        }
+    </style>
+    <!-- FILE: source/assets/css/style.css END -->
+    <!-- ============================================== -->
+
+    <!-- Download CDN ini & simpan ke: source/assets/js/tailwindcss.js -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Space Grotesk', 'sans-serif'] },
+                    colors: {
+                        primary: 'var(--color-primary)', 
+                        brutalBg: 'var(--color-bg)',
+                        darkBg: '#1a1a1a',
+                        darkSurface: '#2d2d2d'
+                    },
+                    boxShadow: {
+                        'brutal': '4px 4px 0px 0px rgba(0,0,0,1)',
+                        'brutal-lg': '8px 8px 0px 0px rgba(0,0,0,1)',
+                        'brutal-dark': '4px 4px 0px 0px rgba(255,255,255,1)',
+                        'brutal-lg-dark': '8px 8px 0px 0px rgba(255,255,255,1)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Download CDN ini & simpan ke folder assets/js/ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="manifest" href="manifest.json">
+</head>
+<body class="bg-brutalBg text-black dark:bg-darkBg dark:text-white font-sans h-screen flex overflow-hidden selection:bg-primary selection:text-black">
+
+    <!-- 1. NOTIFIKASI TOAST -->
+    <div id="toast-container" class="fixed top-5 right-5 z-[9999] flex flex-col gap-3"></div>
+
+    <!-- 2. SIDEBAR DESKTOP -->
+    <aside class="hidden md:flex flex-col w-72 bg-white dark:bg-darkSurface border-r-4 border-black dark:border-white h-full z-20">
+        <div class="p-6 border-b-4 border-black dark:border-white flex justify-between items-center bg-primary">
+            <div class="flex items-center gap-3">
+                <img id="app-logo-desktop" src="" alt="Logo" class="w-8 h-8 object-contain hidden border-2 border-black bg-white dark:bg-gray-800">
+                <h1 id="app-brand-desktop" class="text-2xl font-bold text-black uppercase tracking-widest">HYPECAL</h1>
+            </div>
+        </div>
+        <nav class="flex-1 overflow-y-auto p-4 space-y-3">
+            <button onclick="navigate('dashboard')" class="nav-btn w-full flex items-center gap-3 p-3 text-lg font-bold border-2 border-transparent hover:border-black dark:hover:border-white rounded bg-brutalBg dark:bg-darkBg" data-target="dashboard">
+                <i data-lucide="layout-dashboard"></i> Dasbor
+            </button>
+            <button onclick="navigate('posts')" class="nav-btn w-full flex items-center gap-3 p-3 text-lg font-bold border-2 border-transparent hover:border-black dark:hover:border-white rounded bg-brutalBg dark:bg-darkBg" data-target="posts">
+                <i data-lucide="calendar-days"></i> Kalender Post
+            </button>
+            <button onclick="navigate('categories')" class="nav-btn w-full flex items-center gap-3 p-3 text-lg font-bold border-2 border-transparent hover:border-black dark:hover:border-white rounded bg-brutalBg dark:bg-darkBg" data-target="categories">
+                <i data-lucide="tags"></i> Master Kategori
+            </button>
+            <button onclick="navigate('settings')" class="nav-btn w-full flex items-center gap-3 p-3 text-lg font-bold border-2 border-transparent hover:border-black dark:hover:border-white rounded bg-brutalBg dark:bg-darkBg" data-target="settings">
+                <i data-lucide="settings"></i> Pengaturan
+            </button>
+        </nav>
+        <div class="p-4 border-t-4 border-black dark:border-white">
+            <button onclick="toggleTheme()" class="btn-brutal w-full bg-yellow-300 dark:bg-indigo-600 text-black dark:text-white p-3 font-bold flex justify-center items-center gap-2">
+                <i data-lucide="sun" class="dark:hidden"></i>
+                <i data-lucide="moon" class="hidden dark:block"></i>
+                <span class="dark:hidden">Mode Terang</span>
+                <span class="hidden dark:block">Mode Gelap</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- 3. MAIN CONTENT -->
+    <main class="flex-1 flex flex-col h-full w-full relative">
+        <!-- Mobile Header -->
+        <header class="md:hidden flex justify-between items-center p-4 border-b-4 border-black dark:border-white bg-primary z-20">
+            <div class="flex items-center gap-2">
+                <img id="app-logo-mobile" src="" alt="Logo" class="w-8 h-8 object-contain hidden border-2 border-black bg-white dark:bg-gray-800">
+                <h1 id="app-brand-mobile" class="text-xl font-bold text-black uppercase tracking-widest">HYPECAL</h1>
+            </div>
+            <button onclick="toggleTheme()" class="btn-brutal bg-white dark:bg-black text-black dark:text-white p-2">
+                <i data-lucide="sun" class="dark:hidden"></i>
+                <i data-lucide="moon" class="hidden dark:block"></i>
+            </button>
+        </header>
+
+        <!-- View Containers -->
+        <div id="view-container" class="flex-1 overflow-y-auto pb-safe p-4 md:p-8 bg-brutalBg dark:bg-darkBg">
+            
+            <!-- VIEW: DASHBOARD -->
+            <div id="view-dashboard" class="view-section hidden animate-pop">
+                <h2 class="text-3xl font-bold mb-6 uppercase border-b-4 border-black dark:border-white pb-2 inline-block">Dasbor Laporan</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white dark:bg-darkSurface p-6 border-4 border-black dark:border-white shadow-brutal dark:shadow-brutal-dark">
+                        <h3 class="text-lg font-bold mb-2">Total Postingan</h3>
+                        <p id="stat-total" class="text-5xl font-bold text-primary">0</p>
+                    </div>
+                    <div class="bg-white dark:bg-darkSurface p-6 border-4 border-black dark:border-white shadow-brutal dark:shadow-brutal-dark">
+                        <h3 class="text-lg font-bold mb-2">Akan Datang</h3>
+                        <p id="stat-upcoming" class="text-5xl font-bold text-yellow-500">0</p>
+                    </div>
+                    <div class="bg-white dark:bg-darkSurface p-6 border-4 border-black dark:border-white shadow-brutal dark:shadow-brutal-dark">
+                        <h3 class="text-lg font-bold mb-2">Selesai (Published)</h3>
+                        <p id="stat-done" class="text-5xl font-bold text-green-500">0</p>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-darkSurface p-4 border-4 border-black dark:border-white shadow-brutal dark:shadow-brutal-dark w-full max-w-4xl">
+                    <h3 class="text-xl font-bold mb-4 border-b-2 border-black dark:border-white pb-2">Distribusi Platform/Kategori</h3>
+                    <div class="relative w-full h-64">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- VISUAL KALENDER -->
+                <div class="mt-12 w-full animate-pop max-w-6xl">
+                    <div class="flex items-center gap-4 mb-6 border-b-4 border-black dark:border-white pb-2 inline-flex">
+                        <i data-lucide="calendar" class="w-8 h-8"></i>
+                        <h2 class="text-3xl font-bold uppercase">Visual Kalender</h2>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-darkSurface border-4 border-black dark:border-white shadow-brutal-lg dark:shadow-brutal-lg-dark p-4 md:p-6 w-full">
+                        <div class="flex justify-between items-center mb-6 bg-primary p-3 border-4 border-black dark:border-white">
+                            <button onclick="prevMonth()" class="btn-brutal bg-white p-2 text-black hover:bg-gray-200"><i data-lucide="chevron-left" class="w-6 h-6"></i></button>
+                            <h4 id="calendar-month-year" class="text-xl md:text-2xl font-bold uppercase tracking-widest text-black text-center">BULAN TAHUN</h4>
+                            <button onclick="nextMonth()" class="btn-brutal bg-white p-2 text-black hover:bg-gray-200"><i data-lucide="chevron-right" class="w-6 h-6"></i></button>
+                        </div>
+                        
+                        <div class="grid grid-cols-7 gap-1 md:gap-2 text-center font-bold mb-2 text-xs md:text-base border-b-4 border-black dark:border-white pb-2">
+                            <div class="text-red-500">Min</div><div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div>Sab</div>
+                        </div>
+                        
+                        <div id="calendar-grid" class="grid grid-cols-7 gap-1 md:gap-2">
+                            <!-- JS Injected -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="h-32 w-full shrink-0 block md:hidden"></div>
+            </div>
+
+            <!-- VIEW: POSTS (Content Calendar) -->
+            <div id="view-posts" class="view-section hidden animate-pop h-full flex flex-col">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <h2 class="text-3xl font-bold uppercase border-b-4 border-black dark:border-white pb-2 inline-block">Daftar Konten</h2>
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <button onclick="printReport()" class="btn-brutal bg-white dark:bg-black p-3 font-bold flex items-center justify-center gap-2 flex-1 md:flex-none">
+                            <i data-lucide="printer"></i> Cetak PDF
+                        </button>
+                        <button onclick="openPostModal()" class="btn-brutal bg-primary text-black p-3 font-bold flex items-center justify-center gap-2 flex-1 md:flex-none">
+                            <i data-lucide="plus-square"></i> Buat Post
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sistem Filter Canggih -->
+                <div class="flex flex-col md:flex-row gap-3 mb-6 bg-white dark:bg-darkSurface p-4 border-4 border-black dark:border-white shadow-brutal dark:shadow-brutal-dark">
+                    <div class="flex-1 flex items-center gap-2 border-2 border-black dark:border-white bg-brutalBg dark:bg-darkBg px-3">
+                        <i data-lucide="search" class="w-5 h-5 text-gray-500"></i>
+                        <input type="text" id="search-post" placeholder="Cari judul konten..." class="w-full bg-transparent p-2 font-bold outline-none" oninput="renderPosts()">
+                    </div>
+                    <select id="filter-status" class="input-brutal p-3 font-bold flex-1 md:max-w-[200px]" onchange="renderPosts()">
+                        <option value="all">Semua Status</option>
+                        <option value="Ide">Ide / Draf</option>
+                        <option value="Produksi">Sedang Produksi</option>
+                        <option value="Terjadwal">Terjadwal</option>
+                        <option value="Publish">Published</option>
+                    </select>
+                    <select id="filter-category" class="input-brutal p-3 font-bold flex-1 md:max-w-[200px]" onchange="renderPosts()">
+                        <!-- Injected by JS -->
+                    </select>
+                </div>
+
+                <!-- PRINT AREA -->
+                <div id="print-area" class="flex-1 w-full">
+                    <h2 class="hidden no-print print:block text-2xl font-bold mb-4">Laporan Daftar Konten Sosial Media</h2>
+                    <!-- Desktop Table -->
+                    <div class="w-full overflow-x-auto bg-white dark:bg-darkSurface border-4 border-black dark:border-white shadow-brutal dark:shadow-brutal-dark print:border-none print:shadow-none">
+                        <table class="w-full text-left border-collapse print:text-sm">
+                            <thead>
+                                <tr class="bg-primary text-black border-b-4 border-black dark:border-white print:bg-gray-200">
+                                    <th class="p-4 font-bold border-r-2 border-black dark:border-white print:border-black">Tanggal & Jam</th>
+                                    <th class="p-4 font-bold border-r-2 border-black dark:border-white print:border-black">Judul Konten</th>
+                                    <th class="p-4 font-bold border-r-2 border-black dark:border-white print:border-black">Kategori/Platform</th>
+                                    <th class="p-4 font-bold border-r-2 border-black dark:border-white print:border-black">Status</th>
+                                    <th class="p-4 font-bold text-center no-print">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="post-table-body">
+                                <!-- JS Injected -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Mobile Cards -->
+                    <div id="post-mobile-cards" class="grid grid-cols-1 md:hidden gap-4 no-print">
+                        <!-- JS Injected -->
+                    </div>
+                </div>
+
+                <!-- HUKUM MUTLAK PADDING BAWAH -->
+                <div class="h-32 w-full shrink-0 block md:hidden"></div>
+            </div>
+
+            <!-- VIEW: CATEGORIES -->
+            <div id="view-categories" class="view-section hidden animate-pop">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold uppercase border-b-4 border-black dark:border-white pb-2 inline-block">Master Kategori</h2>
+                    <button onclick="openCatModal()" class="btn-brutal bg-primary text-black px-4 py-2 font-bold flex items-center gap-2">
+                        <i data-lucide="plus"></i> Tambah
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4" id="category-list">
+                    <!-- JS Injected -->
+                </div>
+                <div class="h-32 w-full shrink-0 block md:hidden"></div>
+            </div>
+
+            <!-- VIEW: SETTINGS -->
+            <div id="view-settings" class="view-section hidden animate-pop">
+                <h2 class="text-3xl font-bold mb-6 uppercase border-b-4 border-black dark:border-white pb-2 inline-block">Pengaturan Aplikasi</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Branding -->
+                    <div class="bg-white dark:bg-darkSurface p-6 border-4 border-black dark:border-white shadow-brutal dark:shadow-brutal-dark">
+                        <h3 class="text-xl font-bold mb-4 border-b-2 border-black dark:border-white pb-2">Branding & Tema</h3>
+                        
+                        <label class="block font-bold mb-2">Nama Aplikasi</label>
+                        <input type="text" id="set-app-name" class="input-brutal w-full p-3 mb-4" value="HYPECAL" oninput="saveSettings()">
+
+                        <label class="block font-bold mb-2">Logo Aplikasi</label>
+                        <div class="flex flex-col gap-2 mb-4">
+                            <select id="set-logo-type" class="input-brutal w-full p-2 font-bold" onchange="toggleSetLogoInput(); saveSettings()">
+                                <option value="none">Tanpa Logo</option>
+                                <option value="url">Input URL Logo</option>
+                                <option value="upload">Upload File (Base64)</option>
+                            </select>
+                            <input type="text" id="set-logo-url" class="input-brutal w-full p-3 font-bold hidden" placeholder="https://..." oninput="saveSettings()">
+                            <input type="file" id="set-logo-file" accept="image/*" class="input-brutal w-full p-2 hidden">
+                            <input type="hidden" id="set-logo-base64">
+                        </div>
+
+                        <label class="block font-bold mb-2">Warna Tema (Neo-Brutalism)</label>
+                        <input type="color" id="set-color" class="h-12 w-full p-1 input-brutal cursor-pointer mb-2" oninput="saveSettings()">
+                    </div>
+
+                    <!-- Data Management -->
+                    <div class="bg-white dark:bg-darkSurface p-6 border-4 border-black dark:border-white shadow-brutal dark:shadow-brutal-dark">
+                        <h3 class="text-xl font-bold mb-4 border-b-2 border-black dark:border-white pb-2">Manajemen Data</h3>
+                        
+                        <button onclick="exportExcel()" class="btn-brutal w-full bg-green-400 text-black p-3 font-bold mb-4 flex justify-center items-center gap-2">
+                            <i data-lucide="download"></i> Backup ke Excel
+                        </button>
+                        
+                        <label class="btn-brutal w-full bg-blue-400 text-black p-3 font-bold mb-8 flex justify-center items-center gap-2 cursor-pointer">
+                            <i data-lucide="upload"></i> Restore dari Excel
+                            <input type="file" id="import-excel" accept=".xlsx" class="hidden" onchange="importExcel(event)">
+                        </label>
+
+                        <div class="border-t-4 border-red-500 pt-4">
+                            <button onclick="confirmReset()" class="btn-brutal w-full bg-red-500 text-black p-3 font-bold flex justify-center items-center gap-2">
+                                <i data-lucide="triangle-alert"></i> Reset Total (Hapus Database)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="h-32 w-full shrink-0 block md:hidden"></div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- 4. MOBILE BOTTOM NAV -->
+    <nav class="md:hidden fixed bottom-0 left-0 w-full brutal-nav h-20 z-40 flex justify-around items-center pb-2">
+        <button onclick="navigate('dashboard')" class="mob-nav-btn flex flex-col items-center justify-center w-full h-full text-black dark:text-white" data-target="dashboard">
+            <i data-lucide="layout-dashboard" class="w-6 h-6 mb-1"></i>
+            <span class="text-[10px] font-bold">Dasbor</span>
+        </button>
+        <button onclick="navigate('posts')" class="mob-nav-btn flex flex-col items-center justify-center w-full h-full text-black dark:text-white border-l-2 border-black dark:border-white" data-target="posts">
+            <i data-lucide="calendar-days" class="w-6 h-6 mb-1"></i>
+            <span class="text-[10px] font-bold">Daftar</span>
+        </button>
+        <button onclick="navigate('categories')" class="mob-nav-btn flex flex-col items-center justify-center w-full h-full text-black dark:text-white border-l-2 border-black dark:border-white" data-target="categories">
+            <i data-lucide="tags" class="w-6 h-6 mb-1"></i>
+            <span class="text-[10px] font-bold">Kategori</span>
+        </button>
+        <button onclick="navigate('settings')" class="mob-nav-btn flex flex-col items-center justify-center w-full h-full text-black dark:text-white border-l-2 border-black dark:border-white" data-target="settings">
+            <i data-lucide="settings" class="w-6 h-6 mb-1"></i>
+            <span class="text-[10px] font-bold">Seting</span>
+        </button>
+    </nav>
+
+    <!-- ============================================== -->
+    <!-- MODALS AREA -->
+
+    <!-- Modal Form Post (Swipeable di HP) -->
+    <div id="post-modal-overlay" class="fixed inset-0 bg-black/60 z-[100] hidden items-end md:items-center justify-center backdrop-blur-sm">
+        <div id="post-modal" class="bg-brutalBg dark:bg-darkSurface w-full md:w-[700px] max-h-[90vh] md:max-h-[85vh] flex flex-col border-t-8 md:border-8 border-black dark:border-white shadow-brutal-lg rounded-t-3xl md:rounded-none transform translate-y-full md:translate-y-0 transition-transform duration-300">
+            <!-- Drag Handle Mobile -->
+            <div id="cart-drag-handle" class="w-full h-10 flex justify-center items-center md:hidden cursor-grab active:cursor-grabbing border-b-2 border-black dark:border-white">
+                <div class="w-16 h-2 bg-black dark:bg-white rounded-full"></div>
+            </div>
+            
+            <div class="p-4 border-b-4 border-black dark:border-white flex justify-between items-center bg-primary text-black">
+                <h3 class="text-2xl font-bold uppercase" id="post-modal-title">Buat Konten</h3>
+                <button onclick="closePostModal()" class="btn-brutal bg-white p-1"><i data-lucide="x"></i></button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto flex-1 space-y-4">
+                <input type="hidden" id="post-id">
+                
+                <div>
+                    <label class="block font-bold mb-1">Judul Konten</label>
+                    <input type="text" id="post-title" class="input-brutal w-full p-3 font-bold text-lg" placeholder="Cth: Tips Bisnis 2026" oninput="saveDraft()">
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="border-2 border-black dark:border-white p-3 bg-white dark:bg-darkBg">
+                        <label class="block font-bold mb-2">Jadwal Publish (Prime Time)</label>
+                        <div class="flex gap-2">
+                            <input type="date" id="post-date" class="input-brutal w-full p-2 font-bold text-sm" oninput="saveDraft()">
+                            <input type="time" id="post-time" class="input-brutal w-24 p-2 font-bold text-sm text-center" oninput="saveDraft()">
+                        </div>
+                    </div>
+                    
+                    <div class="border-2 border-black dark:border-white p-3 bg-white dark:bg-darkBg">
+                        <label class="block font-bold mb-2">Status & Eksekusi</label>
+                        <select id="post-status" class="input-brutal w-full p-2 font-bold text-sm" onchange="togglePublishLink(); saveDraft()">
+                            <option value="Ide">Ide / Draf</option>
+                            <option value="Produksi">Sedang Produksi</option>
+                            <option value="Terjadwal">Terjadwal</option>
+                            <option value="Publish">Published</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="wrap-published-link" class="hidden bg-green-100 dark:bg-green-900 border-4 border-green-500 p-3">
+                    <label class="block font-bold mb-1 text-green-800 dark:text-green-200"><i data-lucide="link" class="inline w-4 h-4 mr-1"></i>Link Bukti Tayang (Published URL)</label>
+                    <input type="url" id="post-published-link" class="input-brutal w-full p-2 font-bold text-sm" placeholder="https://instagram.com/p/..." oninput="saveDraft()">
+                </div>
+
+                <div>
+                    <label class="block font-bold mb-1">Kategori / Platform</label>
+                    <select id="post-category" class="input-brutal w-full p-3 font-bold" onchange="saveDraft()">
+                        <!-- Injected -->
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-bold mb-1">Hashtag Bank</label>
+                    <input type="text" id="post-hashtags" class="input-brutal w-full p-3 font-bold text-primary" placeholder="#bisnis #tips2026 #fyp" oninput="saveDraft()">
+                </div>
+
+                <div>
+                    <label class="block font-bold mb-1">Catatan / Caption Utama</label>
+                    <textarea id="post-notes" class="input-brutal w-full p-3 font-bold h-24 resize-none" placeholder="Masukkan brief, catatan, atau caption konten di sini..." oninput="saveDraft()"></textarea>
+                </div>
+
+                <div>
+                    <label class="block font-bold mb-1">Gambar/Thumbnail (Opsional)</label>
+                    <div class="flex flex-col gap-2">
+                        <select id="post-img-type" class="input-brutal w-full p-2 font-bold text-sm" onchange="toggleImgInput(); saveDraft()">
+                            <option value="url">Input URL Gambar</option>
+                            <option value="upload">Upload File (Base64)</option>
+                        </select>
+                        <input type="text" id="post-img-url" class="input-brutal w-full p-3 font-bold" placeholder="https://..." oninput="saveDraft()">
+                        <input type="file" id="post-img-file" accept="image/*" class="input-brutal w-full p-2 hidden bg-white dark:bg-darkSurface">
+                        <input type="hidden" id="post-img-base64">
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 border-t-4 border-black dark:border-white bg-white dark:bg-darkBg flex justify-end gap-3 pb-8 md:pb-4">
+                <button onclick="discardDraft(); closePostModal()" class="btn-brutal bg-gray-300 dark:bg-gray-700 text-black dark:text-white px-4 py-2 font-bold">Batal / Hapus Draf</button>
+                <button onclick="savePost()" class="btn-brutal bg-primary text-black px-6 py-2 font-bold flex items-center gap-2"><i data-lucide="save" class="w-5 h-5"></i> Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Lihat Detail Post -->
+    <div id="view-post-overlay" class="fixed inset-0 bg-black/60 z-[105] hidden items-end md:items-center justify-center backdrop-blur-sm">
+        <div id="view-post-modal" class="bg-brutalBg dark:bg-darkSurface w-full md:w-[600px] max-h-[90vh] md:max-h-[80vh] flex flex-col border-t-8 md:border-8 border-black dark:border-white shadow-brutal-lg rounded-t-3xl md:rounded-none transform translate-y-full md:translate-y-0 transition-transform duration-300">
+            <div class="p-4 border-b-4 border-black dark:border-white flex justify-between items-center bg-primary text-black">
+                <h3 class="text-xl font-bold uppercase">Detail Konten</h3>
+                <button onclick="closeViewPostModal()" class="btn-brutal bg-white p-1"><i data-lucide="x"></i></button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto flex-1 font-bold space-y-4 text-black dark:text-white">
+                <h2 id="vp-title" class="text-3xl mb-1 uppercase tracking-tight"></h2>
+                
+                <div class="flex flex-wrap gap-2 mb-4 items-center">
+                    <span id="vp-date-time" class="px-2 py-1 bg-white dark:bg-black border-2 border-black dark:border-white text-sm flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> <span></span></span>
+                    <span id="vp-cat" class="px-2 py-1 border-2 border-black dark:border-white text-black text-sm" style="border-bottom-width: 4px;"></span>
+                    <span id="vp-status" class="px-2 py-1 border-2 border-black dark:border-white text-sm"></span>
+                </div>
+
+                <div id="vp-published-wrap" class="hidden border-4 border-green-500 bg-green-100 dark:bg-green-900 p-3 shadow-brutal dark:shadow-brutal-dark">
+                    <h4 class="text-xs font-bold uppercase mb-1 text-green-800 dark:text-green-200">Link Tayang:</h4>
+                    <a id="vp-published-link" href="#" target="_blank" class="text-primary underline break-all font-mono text-sm hover:opacity-80"></a>
+                </div>
+                
+                <div class="border-4 border-black dark:border-white bg-white dark:bg-darkBg p-4 shadow-brutal dark:shadow-brutal-dark">
+                    <h4 class="text-sm font-bold uppercase mb-2 border-b-2 border-black dark:border-white pb-1">Hashtags:</h4>
+                    <p id="vp-hashtags" class="text-primary font-mono text-sm mb-4"></p>
+
+                    <h4 class="text-sm font-bold uppercase mb-2 border-b-2 border-black dark:border-white pb-1">Catatan / Caption:</h4>
+                    <p id="vp-notes" class="whitespace-pre-wrap font-sans font-normal text-base leading-relaxed"></p>
+                </div>
+
+                <div id="vp-img-container" class="border-4 border-black dark:border-white p-2 bg-white dark:bg-darkBg shadow-brutal dark:shadow-brutal-dark hidden">
+                    <h4 class="text-sm font-bold uppercase mb-2">Thumbnail:</h4>
+                    <img id="vp-img" class="w-full h-auto border-2 border-black dark:border-white" src="" alt="Thumbnail">
+                </div>
+            </div>
+            
+            <div class="p-4 border-t-4 border-black dark:border-white bg-brutalBg dark:bg-darkBg flex justify-between gap-3 pb-8 md:pb-4">
+                <button id="vp-btn-delete" class="btn-brutal bg-red-500 text-black px-4 py-2 font-bold flex items-center gap-2 hover:bg-red-400"><i data-lucide="trash-2" class="w-5 h-5"></i> Hapus</button>
+                <button id="vp-btn-edit" class="btn-brutal bg-yellow-400 text-black px-6 py-2 font-bold flex items-center gap-2 hover:bg-yellow-300"><i data-lucide="edit-3" class="w-5 h-5"></i> Edit Konten</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Kategori & Hapus -->
+    <div id="cat-modal-overlay" class="fixed inset-0 bg-black/60 z-[110] hidden items-center justify-center backdrop-blur-sm">
+        <div class="bg-white dark:bg-darkSurface w-[90%] md:w-[400px] border-4 border-black dark:border-white shadow-brutal-lg animate-pop">
+            <div class="p-4 border-b-4 border-black dark:border-white flex justify-between items-center bg-primary text-black">
+                <h3 class="text-xl font-bold uppercase" id="cat-modal-title">Tambah Kategori</h3>
+                <button onclick="closeCatModal()" class="btn-brutal bg-white p-1"><i data-lucide="x"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="cat-id">
+                <div>
+                    <label class="block font-bold mb-1">Nama Kategori/Platform</label>
+                    <input type="text" id="cat-name" class="input-brutal w-full p-3 font-bold" placeholder="Cth: Instagram Reels">
+                </div>
+                <div>
+                    <label class="block font-bold mb-1">Warna Label</label>
+                    <input type="color" id="cat-color" class="h-12 w-full p-1 input-brutal cursor-pointer" value="#00e5ff">
+                </div>
+            </div>
+            <div class="p-4 border-t-4 border-black dark:border-white bg-brutalBg dark:bg-darkBg flex justify-end gap-3">
+                <button onclick="saveCategory()" class="btn-brutal bg-primary text-black px-6 py-2 font-bold w-full">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="delete-modal-overlay" class="fixed inset-0 bg-black/80 z-[120] hidden items-center justify-center backdrop-blur-sm">
+        <div class="bg-red-500 w-[90%] md:w-[350px] border-4 border-black dark:border-white shadow-brutal-lg animate-pop text-black p-6 text-center">
+            <i data-lucide="triangle-alert" class="w-16 h-16 mx-auto mb-4"></i>
+            <h3 class="text-2xl font-bold uppercase mb-2">Hapus Data?</h3>
+            <p class="font-bold mb-6 font-mono text-sm">Tindakan ini brutal dan tidak bisa dibatalkan.</p>
+            <div class="flex gap-3">
+                <button onclick="closeDeleteModal()" class="btn-brutal bg-white flex-1 py-2 font-bold">Batal</button>
+                <button id="btn-confirm-delete" class="btn-brutal bg-black text-white flex-1 py-2 font-bold">YA, HAPUS!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Konfirmasi Reset Aplikasi -->
+    <div id="reset-modal-overlay" class="fixed inset-0 bg-black/80 z-[130] hidden items-center justify-center backdrop-blur-sm">
+        <div class="bg-red-600 w-[90%] md:w-[400px] border-4 border-black shadow-brutal-lg animate-pop text-black p-6 text-center">
+            <div class="bg-black w-24 h-24 mx-auto mb-4 rounded-full flex items-center justify-center border-4 border-white shadow-brutal">
+                <i data-lucide="bomb" class="w-12 h-12 text-white"></i>
+            </div>
+            <h3 class="text-2xl font-bold uppercase mb-2 text-white">RESET TOTAL APLIKASI?</h3>
+            <p class="font-bold mb-6 font-mono text-sm text-red-100">Seluruh data postingan, kategori, draf, dan pengaturan akan dihapus permanen. Tindakan ini tidak bisa dibatalkan!</p>
+            <div class="flex gap-3">
+                <button onclick="closeResetModal()" class="btn-brutal bg-white text-black flex-1 py-2 font-bold hover:bg-gray-200">Batal</button>
+                <button id="btn-confirm-reset" class="btn-brutal bg-black text-white flex-1 py-2 font-bold hover:bg-gray-900 border-white">YA, RESET!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- FILE: source/assets/js/app.js START -->
+    <script>
+        lucide.createIcons();
+        let db; let chartInstance = null; let deleteTarget = { type: null, id: null };
+        let currentCalMonth = new Date().getMonth(); let currentCalYear = new Date().getFullYear();
+
+        // [SETTING & THEME LOGIC TETAP SAMA]
+        function applySettings() {
+            const primaryColor = localStorage.getItem('hypecal_primary_color') || '#FF3366';
+            const appName = localStorage.getItem('hypecal_app_name') || 'HYPECAL';
+            const logoType = localStorage.getItem('hypecal_logo_type') || 'none';
+            const logoUrl = localStorage.getItem('hypecal_logo_url') || '';
+            const logoBase64 = localStorage.getItem('hypecal_logo_base64') || '';
+            
+            document.documentElement.style.setProperty('--color-primary', primaryColor);
+            document.querySelector('meta[name="theme-color"]').setAttribute("content", primaryColor);
+            
+            if(document.getElementById('set-color').value !== primaryColor) document.getElementById('set-color').value = primaryColor;
+            if(document.getElementById('set-app-name').value !== appName) document.getElementById('set-app-name').value = appName;
+            document.getElementById('app-brand-desktop').innerText = appName; document.getElementById('app-brand-mobile').innerText = appName;
+
+            if(document.getElementById('set-logo-type').value !== logoType) {
+                document.getElementById('set-logo-type').value = logoType; toggleSetLogoInput();
+            }
+            if(document.getElementById('set-logo-url').value !== logoUrl) document.getElementById('set-logo-url').value = logoUrl;
+            if(document.getElementById('set-logo-base64').value !== logoBase64) document.getElementById('set-logo-base64').value = logoBase64;
+
+            const desktopLogo = document.getElementById('app-logo-desktop'); const mobileLogo = document.getElementById('app-logo-mobile');
+            let activeLogo = '';
+            if (logoType === 'url' && logoUrl) activeLogo = logoUrl;
+            if (logoType === 'upload' && logoBase64) activeLogo = logoBase64;
+            if (activeLogo) {
+                desktopLogo.src = activeLogo; desktopLogo.classList.remove('hidden');
+                mobileLogo.src = activeLogo; mobileLogo.classList.remove('hidden');
+            } else {
+                desktopLogo.classList.add('hidden'); mobileLogo.classList.add('hidden');
+            }
+
+            if (localStorage.getItem('hypecal_theme') === 'dark' || (!('hypecal_theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else { document.documentElement.classList.remove('dark'); }
+        }
+        function toggleSetLogoInput() {
+            const type = document.getElementById('set-logo-type').value;
+            const urlInput = document.getElementById('set-logo-url'); const fileInput = document.getElementById('set-logo-file');
+            if (!urlInput || !fileInput) return;
+            urlInput.classList.add('hidden'); fileInput.classList.add('hidden');
+            if(type === 'url') urlInput.classList.remove('hidden'); else if(type === 'upload') fileInput.classList.remove('hidden');
+        }
+        applySettings();
+        function toggleTheme() { document.documentElement.classList.toggle('dark'); localStorage.setItem('hypecal_theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light'); }
+
+        function navigate(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`view-${viewId}`).classList.remove('hidden');
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if(btn.dataset.target === viewId) { btn.classList.add('bg-primary', 'text-black'); btn.classList.remove('bg-brutalBg', 'dark:bg-darkBg'); } 
+                else { btn.classList.remove('bg-primary', 'text-black'); btn.classList.add('bg-brutalBg', 'dark:bg-darkBg'); }
+            });
+            document.querySelectorAll('.mob-nav-btn').forEach(btn => {
+                if(btn.dataset.target === viewId) btn.classList.add('bg-primary'); else btn.classList.remove('bg-primary');
+            });
+            if(viewId === 'dashboard') renderDashboard();
+            if(viewId === 'posts') renderPosts();
+            if(viewId === 'categories') renderCategories();
+        }
+
+        function showToast(msg, type = 'success') {
+            const container = document.getElementById('toast-container'); const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-primary' : 'bg-red-500';
+            toast.className = `${bgColor} text-black p-4 border-4 border-black shadow-brutal font-bold animate-pop flex items-center justify-between min-w-[250px]`;
+            toast.innerHTML = `<span>${msg}</span> <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}"></i>`;
+            container.appendChild(toast); lucide.createIcons();
+            setTimeout(() => { toast.style.transform = 'translateY(-20px)'; toast.style.opacity = '0'; toast.style.transition = 'all 0.3s'; setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+
+        const request = indexedDB.open('HypeCalDB', 2); // DB Version 2 for new fields
+        request.onupgradeneeded = (e) => {
+            db = e.target.result;
+            if (!db.objectStoreNames.contains('categories')) db.createObjectStore('categories', { keyPath: 'id' });
+            if (!db.objectStoreNames.contains('posts')) db.createObjectStore('posts', { keyPath: 'id' });
+        };
+        request.onsuccess = (e) => { db = e.target.result; checkDummyData(); navigate('dashboard'); };
+        request.onerror = (e) => { showToast('Gagal memuat database offline!', 'error'); };
+
+        function getDBStore(storeName, mode = 'readonly') { return db.transaction(storeName, mode).objectStore(storeName); }
+        function getAllData(storeName) { return new Promise((resolve) => { const req = getDBStore(storeName).getAll(); req.onsuccess = () => resolve(req.result); }); }
+        function saveData(storeName, data) { return new Promise((resolve) => { const req = getDBStore(storeName, 'readwrite').put(data); req.onsuccess = () => resolve(); }); }
+        function deleteData(storeName, id) { return new Promise((resolve) => { const req = getDBStore(storeName, 'readwrite').delete(id); req.onsuccess = () => resolve(); }); }
+
+        async function checkDummyData() {
+            if (localStorage.getItem('hypecal_initialized')) return;
+            const dummyCats = [
+                { id: 'cat1', name: 'Instagram Reels', color: '#ff00ff' },
+                { id: 'cat2', name: 'TikTok Video', color: '#00e5ff' }
+            ];
+            const today = new Date().toISOString().split('T')[0];
+            const dummyPosts = [
+                { id: 'post1', title: 'Tutorial PWA 2026', date: today, time: '19:00', status: 'Terjadwal', categoryId: 'cat2', notes: 'Gunakan sound viral', hashtags: '#pwa #tech', publishedLink: '', imageType: 'url', image: '' }
+            ];
+            for (let cat of dummyCats) await saveData('categories', cat);
+            for (let post of dummyPosts) await saveData('posts', post);
+            localStorage.setItem('hypecal_initialized', 'true');
+            if(document.getElementById('view-dashboard').classList.contains('hidden') === false) renderDashboard();
+        }
+
+        async function renderCategories() {
+            const cats = await getAllData('categories'); const list = document.getElementById('category-list'); list.innerHTML = '';
+            cats.forEach(cat => {
+                list.innerHTML += `
+                    <div class="bg-white dark:bg-darkSurface p-4 border-4 border-black dark:border-white shadow-brutal flex flex-col justify-between h-full relative overflow-hidden group">
+                        <div class="absolute left-0 top-0 w-3 h-full border-r-4 border-black dark:border-white" style="background-color: ${cat.color}"></div>
+                        <div class="pl-4 mb-4 font-bold text-xl break-words">${cat.name}</div>
+                        <div class="pl-4 flex gap-3 mt-auto w-full">
+                            <button onclick="editCategory('${cat.id}')" class="btn-brutal flex-1 bg-yellow-400 py-2 text-black font-bold flex justify-center items-center gap-2"><i data-lucide="edit-3" class="w-5 h-5"></i></button>
+                            <button onclick="confirmDelete('categories', '${cat.id}')" class="btn-brutal flex-1 bg-red-500 py-2 text-black font-bold flex justify-center items-center gap-2"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                        </div>
+                    </div>`;
+            });
+            lucide.createIcons(); populateCategoryDropdown();
+        }
+
+        async function populateCategoryDropdown() {
+            const cats = await getAllData('categories'); 
+            const select = document.getElementById('post-category');
+            const filterSelect = document.getElementById('filter-category');
+            
+            select.innerHTML = '<option value="">-- Pilih Kategori --</option>';
+            filterSelect.innerHTML = '<option value="all">Semua Platform</option>';
+            
+            cats.forEach(cat => {
+                select.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
+                filterSelect.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
+            });
+        }
+
+        function openCatModal() { document.getElementById('cat-id').value = ''; document.getElementById('cat-name').value = ''; document.getElementById('cat-color').value = '#00e5ff'; document.getElementById('cat-modal-title').innerText = 'Tambah Kategori'; document.getElementById('cat-modal-overlay').classList.remove('hidden'); document.getElementById('cat-modal-overlay').classList.add('flex'); }
+        function closeCatModal() { document.getElementById('cat-modal-overlay').classList.add('hidden'); document.getElementById('cat-modal-overlay').classList.remove('flex'); }
+        async function editCategory(id) { const cats = await getAllData('categories'); const cat = cats.find(c => c.id === id); if(cat) { document.getElementById('cat-id').value = cat.id; document.getElementById('cat-name').value = cat.name; document.getElementById('cat-color').value = cat.color; document.getElementById('cat-modal-title').innerText = 'Edit Kategori'; document.getElementById('cat-modal-overlay').classList.remove('hidden'); document.getElementById('cat-modal-overlay').classList.add('flex'); } }
+        async function saveCategory() { const id = document.getElementById('cat-id').value || 'cat_' + Date.now(); const name = document.getElementById('cat-name').value.trim(); const color = document.getElementById('cat-color').value; if(!name) return showToast('Nama wajib diisi!', 'error'); await saveData('categories', { id, name, color }); closeCatModal(); renderCategories(); showToast('Kategori disimpan!'); }
+
+        // POST LOGIC & DRAFT
+        document.getElementById('post-img-file').addEventListener('change', function(e) {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader(); reader.onload = function(event) { document.getElementById('post-img-base64').value = event.target.result; saveDraft(); };
+            reader.readAsDataURL(file);
+        });
+
+        function toggleImgInput() { const type = document.getElementById('post-img-type').value; if(type === 'url') { document.getElementById('post-img-url').classList.remove('hidden'); document.getElementById('post-img-file').classList.add('hidden'); } else { document.getElementById('post-img-url').classList.add('hidden'); document.getElementById('post-img-file').classList.remove('hidden'); } }
+        function togglePublishLink() { const status = document.getElementById('post-status').value; const wrap = document.getElementById('wrap-published-link'); if(status === 'Publish') wrap.classList.remove('hidden'); else wrap.classList.add('hidden'); }
+
+        function saveDraft() {
+            localStorage.setItem('hypecal_draft', JSON.stringify({
+                title: document.getElementById('post-title').value,
+                date: document.getElementById('post-date').value,
+                time: document.getElementById('post-time').value,
+                status: document.getElementById('post-status').value,
+                categoryId: document.getElementById('post-category').value,
+                hashtags: document.getElementById('post-hashtags').value,
+                publishedLink: document.getElementById('post-published-link').value,
+                notes: document.getElementById('post-notes').value,
+                imgType: document.getElementById('post-img-type').value,
+                imgUrl: document.getElementById('post-img-url').value,
+                imgBase64: document.getElementById('post-img-base64').value
+            }));
+        }
+
+        function restoreDraft() {
+            const draftStr = localStorage.getItem('hypecal_draft');
+            if (draftStr) {
+                const draft = JSON.parse(draftStr);
+                document.getElementById('post-title').value = draft.title || '';
+                document.getElementById('post-date').value = draft.date || '';
+                document.getElementById('post-time').value = draft.time || '';
+                document.getElementById('post-status').value = draft.status || 'Ide';
+                document.getElementById('post-category').value = draft.categoryId || '';
+                document.getElementById('post-hashtags').value = draft.hashtags || '';
+                document.getElementById('post-published-link').value = draft.publishedLink || '';
+                document.getElementById('post-notes').value = draft.notes || '';
+                document.getElementById('post-img-type').value = draft.imgType || 'url';
+                document.getElementById('post-img-url').value = draft.imgUrl || '';
+                document.getElementById('post-img-base64').value = draft.imgBase64 || '';
+                toggleImgInput(); togglePublishLink();
+            }
+        }
+
+        function discardDraft() {
+            localStorage.removeItem('hypecal_draft');
+            ['post-id', 'post-title', 'post-date', 'post-time', 'post-hashtags', 'post-published-link', 'post-notes', 'post-img-url', 'post-img-base64', 'post-img-file'].forEach(id => document.getElementById(id).value = '');
+        }
+
+        async function openPostModal(id = null, defaultDate = null) {
+            await populateCategoryDropdown();
+            document.getElementById('post-modal-overlay').classList.remove('hidden'); document.getElementById('post-modal-overlay').classList.add('flex');
+            setTimeout(() => { document.getElementById('post-modal').classList.remove('translate-y-full'); }, 10);
+
+            if(id) {
+                const posts = await getAllData('posts'); const post = posts.find(p => p.id === id);
+                if(post) {
+                    document.getElementById('post-modal-title').innerText = 'Edit Konten';
+                    document.getElementById('post-id').value = post.id;
+                    document.getElementById('post-title').value = post.title;
+                    document.getElementById('post-date').value = post.date;
+                    document.getElementById('post-time').value = post.time || '';
+                    document.getElementById('post-status').value = post.status;
+                    document.getElementById('post-category').value = post.categoryId;
+                    document.getElementById('post-hashtags').value = post.hashtags || '';
+                    document.getElementById('post-published-link').value = post.publishedLink || '';
+                    document.getElementById('post-notes').value = post.notes || '';
+                    document.getElementById('post-img-type').value = post.imageType || 'url';
+                    if(post.imageType === 'upload') { document.getElementById('post-img-base64').value = post.image; document.getElementById('post-img-url').value = ''; } 
+                    else { document.getElementById('post-img-url').value = post.image; document.getElementById('post-img-base64').value = ''; }
+                    toggleImgInput(); togglePublishLink();
+                }
+            } else {
+                document.getElementById('post-modal-title').innerText = 'Buat Konten';
+                document.getElementById('post-id').value = '';
+                restoreDraft();
+                if (defaultDate) { document.getElementById('post-date').value = defaultDate; saveDraft(); }
+            }
+        }
+
+        function closePostModal() {
+            document.getElementById('post-modal').classList.add('translate-y-full');
+            setTimeout(() => { document.getElementById('post-modal-overlay').classList.add('hidden'); document.getElementById('post-modal-overlay').classList.remove('flex'); }, 300);
+        }
+
+        // SWIPE-TO-CLOSE MOBILE
+        let startY = 0; let currentY = 0; const dragHandle = document.getElementById('cart-drag-handle'); const modalSheet = document.getElementById('post-modal');
+        dragHandle.addEventListener('touchstart', e => { startY = e.touches[0].clientY; modalSheet.style.transition = 'none'; }, {passive: true});
+        dragHandle.addEventListener('touchmove', e => { currentY = e.touches[0].clientY; const diff = currentY - startY; if (diff > 0) modalSheet.style.transform = `translateY(${diff}px)`; }, {passive: true});
+        dragHandle.addEventListener('touchend', e => {
+            modalSheet.style.transition = 'transform 0.2s ease-out'; const diff = currentY - startY;
+            if (diff > 150) { closePostModal(); setTimeout(() => modalSheet.style.transform = '', 300); } else modalSheet.style.transform = 'translateY(0)';
+        });
+
+        async function savePost() {
+            const id = document.getElementById('post-id').value || 'post_' + Date.now();
+            const title = document.getElementById('post-title').value.trim();
+            const date = document.getElementById('post-date').value;
+            const time = document.getElementById('post-time').value;
+            const status = document.getElementById('post-status').value;
+            const categoryId = document.getElementById('post-category').value;
+            const hashtags = document.getElementById('post-hashtags').value.trim();
+            const publishedLink = document.getElementById('post-published-link').value.trim();
+            const notes = document.getElementById('post-notes').value.trim();
+            const imageType = document.getElementById('post-img-type').value;
+            const image = imageType === 'url' ? document.getElementById('post-img-url').value : document.getElementById('post-img-base64').value;
+
+            if(!title || !date || !categoryId) return showToast('Judul, Tanggal, dan Kategori wajib diisi!', 'error');
+
+            await saveData('posts', { id, title, date, time, status, categoryId, hashtags, publishedLink, notes, imageType, image });
+            discardDraft(); closePostModal(); renderPosts();
+            if(!document.getElementById('view-dashboard').classList.contains('hidden')) renderDashboard();
+            showToast('Konten berhasil dijadwalkan!');
+        }
+
+        async function viewPost(id) {
+            const posts = await getAllData('posts'); const cats = await getAllData('categories');
+            const post = posts.find(p => p.id === id); if(!post) return;
+            const cat = cats.find(c => c.id === post.categoryId) || { name: 'Uncategorized', color: '#ccc' };
+
+            document.getElementById('vp-title').innerText = post.title;
+            const dateObj = new Date(post.date);
+            const formattedDate = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+            document.getElementById('vp-date-time').querySelector('span').innerText = post.time ? `${formattedDate} • ${post.time}` : formattedDate;
+            
+            document.getElementById('vp-cat').innerText = cat.name; document.getElementById('vp-cat').style.backgroundColor = cat.color;
+            document.getElementById('vp-status').innerText = post.status; document.getElementById('vp-status').className = `px-2 py-1 font-bold border-2 ${getStatusColor(post.status)}`;
+
+            const pubWrap = document.getElementById('vp-published-wrap');
+            if (post.status === 'Publish' && post.publishedLink) {
+                pubWrap.classList.remove('hidden');
+                document.getElementById('vp-published-link').href = post.publishedLink;
+                document.getElementById('vp-published-link').innerText = post.publishedLink;
+            } else { pubWrap.classList.add('hidden'); }
+
+            document.getElementById('vp-hashtags').innerText = post.hashtags || '-';
+            document.getElementById('vp-notes').innerText = post.notes || 'Tidak ada catatan...';
+
+            const imgContainer = document.getElementById('vp-img-container');
+            if (post.image) { document.getElementById('vp-img').src = post.image; imgContainer.classList.remove('hidden'); } else imgContainer.classList.add('hidden');
+
+            document.getElementById('vp-btn-edit').onclick = () => { closeViewPostModal(); setTimeout(() => openPostModal(id), 300); };
+            document.getElementById('vp-btn-delete').onclick = () => { closeViewPostModal(); setTimeout(() => confirmDelete('posts', id), 300); };
+
+            document.getElementById('view-post-overlay').classList.remove('hidden'); document.getElementById('view-post-overlay').classList.add('flex');
+            setTimeout(() => { document.getElementById('view-post-modal').classList.remove('translate-y-full'); }, 10);
+        }
+
+        function closeViewPostModal() { document.getElementById('view-post-modal').classList.add('translate-y-full'); setTimeout(() => { document.getElementById('view-post-overlay').classList.add('hidden'); document.getElementById('view-post-overlay').classList.remove('flex'); }, 300); }
+
+        function getStatusColor(status) {
+            switch(status) {
+                case 'Publish': return 'bg-green-400 text-black border-black dark:border-white print:border-black';
+                case 'Terjadwal': return 'bg-primary text-black border-black dark:border-white print:border-black';
+                case 'Produksi': return 'bg-yellow-400 text-black border-black dark:border-white print:border-black';
+                default: return 'bg-gray-200 text-black border-black dark:border-white print:border-black';
+            }
+        }
+
+        // VISUAL CALENDAR LOGIC
+        function renderVisualCalendar(posts, cats) {
+            const grid = document.getElementById('calendar-grid'); const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            document.getElementById('calendar-month-year').innerText = `${monthNames[currentCalMonth]} ${currentCalYear}`; grid.innerHTML = '';
+            const firstDay = new Date(currentCalYear, currentCalMonth, 1).getDay(); const daysInMonth = new Date(currentCalYear, currentCalMonth + 1, 0).getDate();
+            const today = new Date(); const isCurrentMonth = today.getMonth() === currentCalMonth && today.getFullYear() === currentCalYear;
+            
+            for (let i = 0; i < firstDay; i++) grid.innerHTML += `<div class="p-2 md:p-4 opacity-30 bg-gray-300 dark:bg-gray-800 border-2 border-black dark:border-white"></div>`;
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dateStr = `${currentCalYear}-${String(currentCalMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                const dayPosts = posts.filter(p => p.date === dateStr);
+                let isToday = isCurrentMonth && today.getDate() === i;
+                let bgClass = isToday ? 'bg-yellow-300 dark:bg-indigo-900 shadow-brutal dark:shadow-brutal-dark translate-x-1 -translate-y-1' : 'bg-brutalBg dark:bg-darkBg hover:bg-white dark:hover:bg-darkSurface';
+                let textClass = isToday ? 'text-black dark:text-white border-b-2 border-black dark:border-white' : '';
+                let sundayClass = new Date(currentCalYear, currentCalMonth, i).getDay() === 0 ? 'text-red-600 dark:text-red-400' : '';
+
+                let postHtml = '';
+                if (dayPosts.length > 0) {
+                    dayPosts.forEach(p => {
+                        const cat = cats.find(c => c.id === p.categoryId); const color = cat ? cat.color : '#fff';
+                        postHtml += `<div class="text-[8px] md:text-[11px] font-bold px-1 py-0.5 mt-1 truncate border-2 border-black text-black cursor-pointer hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-transform" style="background-color: ${color};" title="${p.title} (${p.status})" onclick="event.stopPropagation(); viewPost('${p.id}')">${p.time ? p.time+' ' : ''}${p.title}</div>`;
+                    });
+                } else {
+                    postHtml = `<div class="text-[9px] md:text-xs font-bold text-gray-500 mt-2 text-center border-2 border-dashed border-gray-400 dark:border-gray-600 p-1 opacity-60 group-hover:opacity-100 group-hover:border-black dark:group-hover:border-white transition-all">+ Tambah</div>`;
+                }
+                
+                grid.innerHTML += `
+                    <div class="group flex flex-col p-1 md:p-2 min-h-[80px] md:min-h-[120px] border-2 border-black dark:border-white cursor-pointer ${bgClass} transition-all duration-200" onclick="openPostModal(null, '${dateStr}')" title="Buat post untuk tanggal ini">
+                        <span class="font-bold text-sm md:text-lg inline-block w-fit ${textClass} ${sundayClass}">${i}</span>
+                        <div class="mt-1 flex flex-col gap-1 flex-1 overflow-y-auto no-scrollbar">${postHtml}</div>
+                    </div>`;
+            }
+        }
+        function prevMonth() { currentCalMonth--; if(currentCalMonth < 0) { currentCalMonth = 11; currentCalYear--; } renderDashboard(); }
+        function nextMonth() { currentCalMonth++; if(currentCalMonth > 11) { currentCalMonth = 0; currentCalYear++; } renderDashboard(); }
+
+        async function renderPosts() {
+            const posts = await getAllData('posts'); const cats = await getAllData('categories');
+            const search = document.getElementById('search-post').value.toLowerCase();
+            const filterStatus = document.getElementById('filter-status').value;
+            const filterCategory = document.getElementById('filter-category').value;
+            
+            posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            const tableBody = document.getElementById('post-table-body'); const mobileCards = document.getElementById('post-mobile-cards');
+            tableBody.innerHTML = ''; mobileCards.innerHTML = ''; let hasData = false;
+
+            posts.forEach(post => {
+                // Terapkan Filter
+                const matchSearch = post.title.toLowerCase().includes(search);
+                const matchStatus = filterStatus === 'all' || post.status === filterStatus;
+                const matchCategory = filterCategory === 'all' || post.categoryId === filterCategory;
+
+                if(matchSearch && matchStatus && matchCategory) {
+                    hasData = true;
+                    const cat = cats.find(c => c.id === post.categoryId) || { name: 'Uncategorized', color: '#ccc' };
+                    const statClass = getStatusColor(post.status);
+                    
+                    const dateObj = new Date(post.date);
+                    const dateStr = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+                    const displayDateTime = post.time ? `${dateStr}<br><span class="text-xs text-primary print:text-black"><i data-lucide="clock" class="inline w-3 h-3"></i> ${post.time}</span>` : dateStr;
+
+                    tableBody.innerHTML += `
+                        <tr class="border-b-4 border-black dark:border-white bg-white dark:bg-darkBg hover:bg-gray-100 dark:hover:bg-darkSurface transition-colors print:bg-white print:border-black print:text-black">
+                            <td class="p-4 font-mono font-bold border-r-2 border-black dark:border-white align-middle leading-tight print:border-black">${displayDateTime}</td>
+                            <td class="p-4 font-bold border-r-2 border-black dark:border-white align-middle print:border-black">${post.title}</td>
+                            <td class="p-4 border-r-2 border-black dark:border-white align-middle print:border-black">
+                                <span class="px-2 py-1 border-2 border-black dark:border-white font-bold text-sm bg-white dark:bg-black text-black dark:text-white print:bg-white print:text-black print:border-black" style="border-bottom-width: 4px; border-color: ${cat.color} !important;">${cat.name}</span>
+                            </td>
+                            <td class="p-4 border-r-2 border-black dark:border-white align-middle print:border-black">
+                                <span class="px-3 py-1 font-bold border-2 ${statClass}">${post.status}</span>
+                            </td>
+                            <td class="p-4 no-print align-middle">
+                                <div class="flex justify-center items-center gap-2">
+                                    <button onclick="viewPost('${post.id}')" class="btn-brutal bg-blue-400 p-2 text-black hover:bg-blue-300 transition-colors" title="Lihat Detail"><i data-lucide="eye" class="w-5 h-5"></i></button>
+                                    <button onclick="openPostModal('${post.id}')" class="btn-brutal bg-yellow-400 p-2 text-black hover:bg-yellow-300 transition-colors" title="Edit Post"><i data-lucide="edit-3" class="w-5 h-5"></i></button>
+                                    <button onclick="confirmDelete('posts', '${post.id}')" class="btn-brutal bg-red-500 p-2 text-black hover:bg-red-400 transition-colors" title="Hapus Post"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                                </div>
+                            </td>
+                        </tr>`;
+
+                    mobileCards.innerHTML += `
+                        <div class="bg-white dark:bg-darkSurface border-4 border-black dark:border-white p-4 shadow-brutal dark:shadow-brutal-dark relative overflow-hidden flex flex-col gap-2">
+                            <div class="absolute right-0 top-0 w-4 h-full border-l-4 border-black dark:border-white" style="background-color: ${cat.color}"></div>
+                            <div class="flex justify-between items-start pr-6">
+                                <span class="font-mono font-bold text-xs bg-gray-200 dark:bg-gray-700 px-2 border-2 border-black dark:border-white leading-tight">${post.time ? dateStr+' • '+post.time : dateStr}</span>
+                                <span class="px-2 py-1 text-xs font-bold border-2 ${statClass}">${post.status}</span>
+                            </div>
+                            <h4 class="text-xl font-bold mt-1 pr-6 leading-tight">${post.title}</h4>
+                            <div class="text-sm font-bold text-gray-600 dark:text-gray-300 mt-1">${cat.name}</div>
+                            <div class="flex gap-2 mt-3 pt-3 border-t-2 border-black dark:border-white border-dashed no-print pr-6">
+                                <button onclick="viewPost('${post.id}')" class="btn-brutal flex-1 bg-blue-400 py-1 text-black font-bold flex justify-center"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                <button onclick="openPostModal('${post.id}')" class="btn-brutal flex-1 bg-yellow-400 py-1 text-black font-bold flex justify-center"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                                <button onclick="confirmDelete('posts', '${post.id}')" class="btn-brutal flex-1 bg-red-500 py-1 text-black font-bold flex justify-center"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                            </div>
+                        </div>`;
+                }
+            });
+
+            if(!hasData) {
+                tableBody.innerHTML = `<tr><td colspan="5" class="p-8 text-center font-bold text-gray-500 print:text-black">Tidak ada data sesuai filter.</td></tr>`;
+                mobileCards.innerHTML = `<div class="p-8 text-center font-bold text-gray-500 border-4 border-dashed border-gray-400">Tidak ada data konten.</div>`;
+            }
+            lucide.createIcons();
+        }
+
+        async function renderDashboard() {
+            const posts = await getAllData('posts'); const cats = await getAllData('categories');
+            renderVisualCalendar(posts, cats);
+            document.getElementById('stat-total').innerText = posts.length;
+            document.getElementById('stat-upcoming').innerText = posts.filter(p => p.status === 'Ide' || p.status === 'Terjadwal' || p.status === 'Produksi').length;
+            document.getElementById('stat-done').innerText = posts.filter(p => p.status === 'Publish').length;
+
+            const catCounts = {}; const catColors = {}; const catBorders = {};
+            cats.forEach(c => { catCounts[c.name] = 0; catColors[c.name] = c.color; });
+            posts.forEach(p => { const c = cats.find(cat => cat.id === p.categoryId); if(c) catCounts[c.name]++; });
+
+            const labels = Object.keys(catCounts); const data = Object.values(catCounts);
+            const bgColors = labels.map(l => catColors[l]); const borderColors = labels.map(() => document.documentElement.classList.contains('dark') ? '#ffffff' : '#000000');
+
+            if(chartInstance) chartInstance.destroy();
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            Chart.defaults.font.family = "'Space Grotesk', sans-serif"; Chart.defaults.font.weight = 'bold'; Chart.defaults.color = document.documentElement.classList.contains('dark') ? '#ffffff' : '#000000';
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: labels, datasets: [{ label: 'Jumlah Konten', data: data, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 3, borderRadius: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { grid: { display: false } } } }
+            });
+        }
+
+        function confirmDelete(type, id) { deleteTarget = { type, id }; document.getElementById('delete-modal-overlay').classList.remove('hidden'); document.getElementById('delete-modal-overlay').classList.add('flex'); }
+        function closeDeleteModal() { document.getElementById('delete-modal-overlay').classList.add('hidden'); document.getElementById('delete-modal-overlay').classList.remove('flex'); deleteTarget = { type: null, id: null }; }
+        document.getElementById('btn-confirm-delete').addEventListener('click', async () => {
+            if(deleteTarget.id && deleteTarget.type) {
+                await deleteData(deleteTarget.type, deleteTarget.id); closeDeleteModal(); showToast('Data berhasil dimusnahkan!', 'success');
+                if(deleteTarget.type === 'posts') renderPosts(); if(deleteTarget.type === 'categories') renderCategories(); if(!document.getElementById('view-dashboard').classList.contains('hidden')) renderDashboard();
+            }
+        });
+
+        // FUNGSI RESET TOTAL APLIKASI
+        function confirmReset() { 
+            document.getElementById('reset-modal-overlay').classList.remove('hidden'); 
+            document.getElementById('reset-modal-overlay').classList.add('flex'); 
+        }
+        function closeResetModal() { 
+            document.getElementById('reset-modal-overlay').classList.add('hidden'); 
+            document.getElementById('reset-modal-overlay').classList.remove('flex'); 
+        }
+        document.getElementById('btn-confirm-reset').addEventListener('click', () => {
+            closeResetModal();
+            
+            // WAJIB: Tutup koneksi ke database sebelum menghapus
+            if (db) {
+                db.close(); 
+            }
+            
+            const req = indexedDB.deleteDatabase('HypeCalDB');
+            
+            req.onsuccess = function () { 
+                localStorage.clear(); // Bersihkan semua branding dan setting
+                showToast('Reset Aplikasi Berhasil! Memuat ulang...', 'success'); 
+                setTimeout(() => window.location.reload(), 1500); 
+            };
+            
+            req.onerror = function () {
+                showToast('Gagal mereset database', 'error');
+            };
+            
+            // Tangani jika browser memblokir (misal karena tab ganda)
+            req.onblocked = function () {
+                localStorage.clear();
+                showToast('Reset Berhasil! Memuat ulang...', 'success'); 
+                setTimeout(() => window.location.reload(), 1500);
+            };
+        });
+
+        // FUNGSI CETAK PDF CERDAS
+        function printReport() { 
+            const wasDark = document.documentElement.classList.contains('dark');
+            // Jika sedang dark mode, matikan sejenak
+            if (wasDark) {
+                document.documentElement.classList.remove('dark');
+            }
+            
+            // Beri jeda sangat singkat agar UI sempat berubah putih sebelum mencetak
+            setTimeout(() => {
+                window.print();
+                // Kembalikan ke dark mode jika sebelumnya aktif
+                if (wasDark) {
+                    setTimeout(() => { document.documentElement.classList.add('dark'); }, 500);
+                }
+            }, 100);
+        }
+
+        document.getElementById('set-logo-file').addEventListener('change', function(e) {
+            const file = e.target.files[0]; if (!file) return; const reader = new FileReader();
+            reader.onload = function(event) { document.getElementById('set-logo-base64').value = event.target.result; saveSettings(); };
+            reader.readAsDataURL(file);
+        });
+
+        function saveSettings() {
+            localStorage.setItem('hypecal_app_name', document.getElementById('set-app-name').value.trim() || 'HYPECAL');
+            localStorage.setItem('hypecal_primary_color', document.getElementById('set-color').value);
+            localStorage.setItem('hypecal_logo_type', document.getElementById('set-logo-type').value);
+            localStorage.setItem('hypecal_logo_url', document.getElementById('set-logo-url').value);
+            localStorage.setItem('hypecal_logo_base64', document.getElementById('set-logo-base64').value);
+            applySettings();
+        }
+
+        async function exportExcel() {
+            try {
+                const posts = await getAllData('posts'); const cats = await getAllData('categories');
+                const excelData = posts.map(p => {
+                    const c = cats.find(cat => cat.id === p.categoryId);
+                    return {
+                        ID: p.id, Tanggal: p.date, Jam: p.time || '', Judul: p.title, Kategori: c ? c.name : 'Unknown',
+                        Status: p.status, Link_Tayang: p.publishedLink || '', Hashtags: p.hashtags || '', Catatan: p.notes || '',
+                        Gambar_Type: p.imageType || '', Gambar_URL_Base64: p.imageType === 'url' ? p.image : 'Terdapat File Base64'
+                    }
+                });
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(excelData), "Kalender_Konten");
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cats), "Master_Kategori");
+                XLSX.writeFile(wb, `HypeCal_Backup_${new Date().toISOString().split('T')[0]}.xlsx`); showToast('Berhasil diexport ke Excel!');
+            } catch (err) { showToast('Gagal export data!', 'error'); }
+        }
+
+        function importExcel(e) {
+            const file = e.target.files[0]; if (!file) return; const reader = new FileReader();
+            reader.onload = async function(event) {
+                try {
+                    const workbook = XLSX.read(new Uint8Array(event.target.result), {type: 'array'});
+                    if(workbook.SheetNames.includes("Master_Kategori")) {
+                        const catData = XLSX.utils.sheet_to_json(workbook.Sheets["Master_Kategori"]);
+                        for(let c of catData) if(c.id && c.name) await saveData('categories', c);
+                    }
+                    if(workbook.SheetNames.includes("Kalender_Konten")) {
+                        const postData = XLSX.utils.sheet_to_json(workbook.Sheets["Kalender_Konten"]);
+                        const cats = await getAllData('categories');
+                        for(let p of postData) {
+                            if(p.ID && p.Judul) {
+                                const matchedCat = cats.find(c => c.name === p.Kategori);
+                                await saveData('posts', {
+                                    id: p.ID, date: p.Tanggal, time: p.Jam || '', title: p.Judul, status: p.Status, categoryId: matchedCat ? matchedCat.id : cats[0]?.id || 'cat_temp',
+                                    hashtags: p.Hashtags || '', publishedLink: p.Link_Tayang || '', notes: p.Catatan || '', imageType: p.Gambar_Type || 'url', image: p.Gambar_URL_Base64 === 'Terdapat File Base64' ? '' : (p.Gambar_URL_Base64 || '')
+                                });
+                            }
+                        }
+                    }
+                    showToast('Restore berhasil! Memuat ulang...'); setTimeout(() => window.location.reload(), 1000);
+                } catch (err) { showToast('Format Excel tidak valid!', 'error'); }
+            }; reader.readAsArrayBuffer(file); e.target.value = '';
+        }
+
+        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Reg Failed!', err)); }); }
+        
+        // FILE: source/assets/js/app.js END
+    </script>
+    <!-- ============================================== -->
+</body>
+</html>
